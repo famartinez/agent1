@@ -1,25 +1,38 @@
-# Simple Customer Service AI Agent
+from openai import OpenAI
+from dotenv import load_dotenv
 
-faq = {
-    "hours": "We are open Monday to Friday from 9 AM to 5 PM.",
-    "refund": "Refunds are available within 30 days with a receipt.",
-    "shipping": "Standard shipping takes 3–5 business days.",
-    "contact": "You can contact support at support@example.com.",
-    "price": "Our pricing depends on the service. Please tell me what you're interested in.",
-    "location": "We are located in South San Francisco, CA."
-}
+load_dotenv()
 
-def find_answer(user_message):
-    user_message = user_message.lower()
+client = OpenAI()
 
-    for keyword, answer in faq.items():
-        if keyword in user_message:
-            return answer
+SYSTEM_PROMPT = """
+You are a helpful customer service AI agent.
 
-    return "I'm not sure yet, but I can connect you with a human support rep."
+Business info:
+- Hours: Monday to Friday, 9 AM to 5 PM
+- Refunds: Available within 30 days with receipt
+- Shipping: 3–5 business days
+- Contact: support@example.com
+- Location: South San Francisco, CA
+
+Rules:
+- Be friendly and concise.
+- If unsure, say you can connect the customer with a human support rep.
+"""
+
+def ask_agent(user_message):
+    response = client.responses.create(
+        model="gpt-5.5",
+        input=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+    )
+
+    return response.output_text
 
 def run_agent():
-    print("Customer Service Agent")
+    print("Customer Service AI Agent")
     print("Type 'quit' to exit.\n")
 
     while True:
@@ -29,7 +42,7 @@ def run_agent():
             print("Agent: Thanks for reaching out. Have a great day!")
             break
 
-        response = find_answer(user_message)
+        response = ask_agent(user_message)
         print("Agent:", response)
 
 run_agent()
